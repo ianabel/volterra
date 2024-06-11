@@ -18,5 +18,10 @@ int main( int, char ** )
 	{
 		std::cout << i*1.0/N << '\t' << 1.0 - data[i] << std::endl;
 	}
+	data = tsolve.Solve( Source, Kernel, 1.0, N*4 );
+	for( unsigned int i=0; i <= N*4; ++i ) 
+	{
+		std::cout << i*1.0/(N*4) << '\t' << 1.0 - data[i] << std::endl;
+	}
 	return 0;
 }
