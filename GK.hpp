@@ -19,7 +19,18 @@ class LinearGK
 		double Gamma0( double L1, double L2 ) const {
 			double x = (L1 + L2)/2.0;
 			double y = (L1 - L2)/2.0;
-			return std::exp( -x ) * std::cyl_bessel_i( 0.0, std::sqrt( x * x - y * y ) ); 
+			double y2 = y*y;
+			double x2 = x*x;
+			double s = std::sqrt( x2 - y2 ); 
+
+			if( (abs(x) < 600) || (abs(y2) > 0.1*abs(x) ) )
+				return std::exp( -x ) * std::cyl_bessel_i( 0.0, s );
+			else
+			{
+				// y^2 << x
+				return ( 1.0 + (1.0 + 4.0*y2)/(8.0*x) + (9. - 24. * y2 + 16. * y2 * y2 )/(128. * x2) )  / ( sqrt( 2.0 * M_PI * x ) );
+			}
+
 		};
 
 		double Lambda( double L1, double L2 ) const {
@@ -27,14 +38,16 @@ class LinearGK
 			return 1.0 - (L1 + L2)/2.0 + x * std::cyl_bessel_i( 1.0, x ) / std::cyl_bessel_i( 0.0, x );
 		}
 
-		double lambda( double t ) const { return (ky*ky + OmegaS * OmegaS * t * t ) / 2.0; };
+		double lambda( double t ) const { 
+			return (ky*ky + OmegaS * OmegaS * t * t ) / 2.0;
+		};
 
 		std::complex<double> K( double t, double tPrime ) const {
 			double dt2 = (t - tPrime)/2.0;
 			double l1 = lambda(t);
 			double l2 = lambda(tPrime);
 			std::complex<double> I(0.0,1.0);
-			return std::exp( -(dt2*dt2) ) * (
+			return std::exp( -1.0 * (dt2*dt2) ) * (
 					( qOverEpsilon * OmegaS - 1.0 ) * dt2
 					- I * OmegaStar * ( 1.0 + eta * ( Lambda( l1, l2 ) - 1 - dt2*dt2 ) )
 					) * Gamma0( l1, l2 );
