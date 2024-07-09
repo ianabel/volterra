@@ -9,8 +9,8 @@
 
 int main( int, char ** )
 {
-	unsigned int N = 4096.0;
-	double tEnd = 600.0;
+	unsigned int N = 1024.0;
+	double tEnd = 30.0;
 	SimpsonSolver< std::complex<double> > ssolve;
 	LinearGK lin_gk( 1.0, 50.0, 2.0, 0.0, 1.0, 1.0 );
 

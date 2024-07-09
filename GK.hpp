@@ -1,6 +1,13 @@
 
 #include <complex>
 #include <cmath>
+#include <limits>
+#include <boost/math/special_functions/factorials.hpp>
+
+using std::exp;
+using std::sqrt;
+using std::log;
+using std::cyl_bessel_i;
 
 class LinearGK
 {
@@ -16,20 +23,35 @@ class LinearGK
 		{
 		}
 
+		static double ScaledBesselI( double x ) {
+			if ( x > 22.0 ) { /* Asymptotic series expansion */
+				double ExpI0 = 1.0;	// Factor out the 1/sqrt(2*pi*x)
+				double Ak = 1.0;
+				double z = 1.0/x;
+				double log_z = log(z);
+				const unsigned int k_max = 46;
+				for( unsigned int k = 0; k < k_max; ++k )
+				{
+					// A_{k+1}
+					double Ak1 = Ak * z * (0.5 + k) * (0.5 + k) * (0.5) / ( 1.0 + k );
+					ExpI0 += Ak1;
+					Ak = Ak1;
+				}
+				return ExpI0/sqrt( 2.0 * M_PI * x );
+			} else {
+				return exp(-x) * cyl_bessel_i(0,x);
+			}
+		}
+
 		double Gamma0( double L1, double L2 ) const {
 			double x = (L1 + L2)/2.0;
-			double y = (L1 - L2)/2.0;
-			double y2 = y*y;
-			double x2 = x*x;
-			double s = std::sqrt( x2 - y2 ); 
+			double s = sqrt( L1 * L2 ); 
 
-			if( (abs(x) < 600) || (abs(y2) > 0.1*abs(x) ) )
-				return std::exp( -x ) * std::cyl_bessel_i( 0.0, s );
-			else
-			{
-				// y^2 << x
-				return ( 1.0 + (1.0 + 4.0*y2)/(8.0*x) + (9. - 24. * y2 + 16. * y2 * y2 )/(128. * x2) )  / ( sqrt( 2.0 * M_PI * x ) );
-			}
+			// Gamma0 = exp(-x)*I_0(s) = exp( s - x ) * [ exp(-s) * I_0(s) ]
+			double E = exp( s - x );
+			double ScaledI = ScaledBesselI( s );
+
+			return E * ScaledI;	
 
 		};
 
