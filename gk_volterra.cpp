@@ -6,13 +6,14 @@
 #include <iostream>
 #include <fstream>
 
+using std::sqrt;
 
 int main( int, char ** )
 {
-	unsigned int N = 1024.0;
-	double tEnd = 30.0;
+	unsigned int N = 2048;
+	double tEnd = 200.0 * sqrt(2.0);
 	SimpsonSolver< std::complex<double> > ssolve;
-	LinearGK lin_gk( 1.0, 50.0, 2.0, 0.0, 1.0, 1.0 );
+	SlabLinearGK lin_gk( 1.0, 0.05, 5.0/sqrt(2), 2.0, 0.5*sqrt(2) );
 
 	auto Source = lin_gk.getSourceFn();
 	auto Kernel = lin_gk.getKernelFn();
